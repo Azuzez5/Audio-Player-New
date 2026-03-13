@@ -473,21 +473,24 @@ VISUALIZER
 
 async function initAudioGraph(){
 
- if(audioContext) return
+  if(audioContext) return
 
- const AudioCtx = window.AudioContext || window.webkitAudioContext
- audioContext = new AudioCtx()
+  const AudioCtx = window.AudioContext || window.webkitAudioContext
+  audioContext = new AudioCtx()
 
- analyser = audioContext.createAnalyser()
+  analyser = audioContext.createAnalyser()
 
- sourceNode = audioContext.createMediaElementSource(audio)
+  sourceNode = audioContext.createMediaElementSource(audio)
 
- sourceNode.connect(analyser)
- analyser.connect(audioContext.destination)
+  // analyser chỉ để đọc dữ liệu
+  sourceNode.connect(analyser)
 
- analyser.fftSize = 256
+  // audio vẫn đi trực tiếp ra speaker
+  sourceNode.connect(audioContext.destination)
 
- drawVisualizer()
+  analyser.fftSize = 256
+
+  drawVisualizer()
 
 }
 
