@@ -49,6 +49,7 @@ let dragSourceIndex = null
 let audioContext
 let analyser
 let sourceNode = null
+let visualizerActive = true
 /* =========================
 DATABASE
 ========================= */
@@ -482,10 +483,11 @@ async function initAudioGraph(){
 
  sourceNode = audioContext.createMediaElementSource(audio)
 
- // analyser chỉ để đọc dữ liệu
- sourceNode.connect(analyser)
+ // audio luôn đi thẳng ra loa
+ sourceNode.connect(audioContext.destination)
 
- analyser.connect(audioContext.destination)
+ // visualizer chỉ là nhánh phụ
+ sourceNode.connect(analyser)
 
  analyser.fftSize = 256
 
@@ -499,26 +501,27 @@ function drawVisualizer(){
 
  function draw(){
 
-  requestAnimationFrame(draw)
+ requestAnimationFrame(draw)
 
-  analyser.getByteFrequencyData(data)
+ if(!visualizerActive) return
 
-  ctx.clearRect(0,0,canvas.width,canvas.height)
+ analyser.getByteFrequencyData(data)
 
-  const w = canvas.width/buffer
+ ctx.clearRect(0,0,canvas.width,canvas.height)
 
-  for(let i=0;i<buffer;i++){
+ const w = canvas.width/buffer
 
-   const h=data[i]
+ for(let i=0;i<buffer;i++){
 
-   ctx.fillStyle="#38bdf8"
+  const h=data[i]
 
-   ctx.fillRect(i*w,canvas.height-h/2,w-1,h/2)
+  ctx.fillStyle="#38bdf8"
 
-  }
+  ctx.fillRect(i*w,canvas.height-h/2,w-1,h/2)
 
  }
 
+}
  draw()
 
 }
@@ -688,35 +691,28 @@ if("serviceWorker" in navigator){
 }
   document.addEventListener("visibilitychange", async () => {
 
-  if (!audioContext || !sourceNode || !analyser) return;
+ if(!audioContext) return
 
-  try {
+ if(document.hidden){
 
-    if (document.hidden) {
+  visualizerActive = false
 
-      // Background → tắt visualizer
-      sourceNode.disconnect();
-      analyser.disconnect();
+  try{
+   sourceNode.disconnect(analyser)
+  }catch(e){}
 
-      // đảm bảo audio vẫn phát trực tiếp
-      sourceNode.connect(audioContext.destination);
+ }else{
 
-    } else {
+  visualizerActive = true
 
-      // Foreground → bật lại visualizer
-      sourceNode.disconnect();
+  try{
+   sourceNode.connect(analyser)
+  }catch(e){}
 
-      sourceNode.connect(analyser);
-      analyser.connect(audioContext.destination);
-
-      if (audioContext.state === "suspended") {
-        await audioContext.resume();
-      }
-
-    }
-
-  } catch (e) {
-    console.log("Audio graph error:", e);
+  if(audioContext.state === "suspended"){
+   await audioContext.resume()
   }
 
-});
+ }
+
+})
