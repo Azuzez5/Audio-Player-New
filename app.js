@@ -44,11 +44,11 @@ STATE
 let playlist = []
 let currentIndex = -1
 let searchTerm = ""
+let dragSourceIndex = null
 
 let audioContext
 let analyser
 let sourceNode = null
-
 /* =========================
 DATABASE
 ========================= */
@@ -473,10 +473,27 @@ VISUALIZER
 
 async function initAudioGraph(){
 
+ if(audioContext) return
+
+ const AudioCtx = window.AudioContext || window.webkitAudioContext
+ audioContext = new AudioCtx()
+
+ analyser = audioContext.createAnalyser()
+
+ sourceNode = audioContext.createMediaElementSource(audio)
+
+ sourceNode.connect(analyser)
+ analyser.connect(audioContext.destination)
+
+ analyser.fftSize = 256
+
+ drawVisualizer()
+
+}
+
 function drawVisualizer(){
 
  const buffer = analyser.frequencyBinCount
-
  const data = new Uint8Array(buffer)
 
  function draw(){
@@ -504,49 +521,32 @@ function drawVisualizer(){
  draw()
 
 }
+function disableVisualizer(){
+
+ if(!audioContext) return
+
+ try{
+  sourceNode.disconnect()
+  analyser.disconnect()
+ }catch(e){}
+
+}
+
+function enableVisualizer(){
+
+ if(!audioContext) return
+
+ try{
+  sourceNode.connect(analyser)
+  analyser.connect(audioContext.destination)
+ }catch(e){}
+
+}
 
 /* =========================
 EVENTS
 ========================= */
-  function disableVisualizer(){
 
-  if(!audioContext) return
-
-  try{
-
-    if(sourceNode) sourceNode.disconnect()
-
-    if(analyser) analyser.disconnect()
-
-  }catch(e){}
-
-}
-  function enableVisualizer(){
-
-  if(!audioContext) return
-
-  try{
-
-    sourceNode.connect(analyser)
-
-    analyser.connect(audioContext.destination)
-
-  }catch(e){}
-
-}
-document.addEventListener("visibilitychange", async () => {
-
-  if (!audioContext) return
-
-  if (document.visibilityState === "visible") {
-
-    if (audioContext.state === "suspended") {
-      await audioContext.resume()
-    }
-
-  }
-
-})
 audio.addEventListener("pause", () => {
 
   if (audioContext && audioContext.state === "suspended") return
@@ -637,43 +637,33 @@ audio.onloadedmetadata=()=>{
 
 audio.onplay = async () => {
 
-  if(audioContext && audioContext.state === "suspended"){
-    await audioContext.resume()
-  }
+ if(audioContext && audioContext.state === "suspended"){
+  await audioContext.resume()
+ }
 
-  playBtn.textContent = "⏸"
+ playBtn.textContent="⏸"
 
-  renderPlaylist()
-
-}
-
-  playBtn.textContent = "⏸";
-
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.playbackState = "playing";
-  }
-
-  renderPlaylist();
-}
-
-audio.onpause = () => {
-
-  playBtn.textContent = "▶";
-
-  if ('mediaSession' in navigator) {
-    navigator.mediaSession.playbackState = "paused";
-  }
-
-  renderPlaylist();
-}
-
-audio.onpause=()=>{
-
- playBtn.textContent="▶"
+ if ('mediaSession' in navigator) {
+  navigator.mediaSession.playbackState = "playing";
+ }
 
  renderPlaylist()
 
 }
+
+
+audio.onpause = () => {
+
+ playBtn.textContent="▶"
+
+ if ('mediaSession' in navigator) {
+  navigator.mediaSession.playbackState = "paused";
+ }
+
+ renderPlaylist()
+
+}
+
 
 /* =========================
 INIT
