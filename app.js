@@ -474,8 +474,7 @@ async function initAudioGraph(){
 
  if(audioContext) return
 
- audioContext = new AudioContext()
-
+audioContext = new (window.AudioContext || window.webkitAudioContext)()
  analyser = audioContext.createAnalyser()
 
  const src = audioContext.createMediaElementSource(audio)
@@ -524,6 +523,35 @@ function drawVisualizer(){
 /* =========================
 EVENTS
 ========================= */
+document.addEventListener("visibilitychange", async () => {
+
+  if (!audioContext) return
+
+  if (document.visibilityState === "visible") {
+
+    if (audioContext.state === "suspended") {
+      await audioContext.resume()
+    }
+
+  }
+
+})
+audio.addEventListener("pause", () => {
+
+  if (audioContext && audioContext.state === "suspended") return
+
+  if (audioContext) {
+    audioContext.resume()
+  }
+
+})
+audio.addEventListener("play", async () => {
+
+  if (audioContext && audioContext.state === "suspended") {
+    await audioContext.resume()
+  }
+
+})
 
 fileInput.onchange=e=>addFiles(e.target.files)
 
