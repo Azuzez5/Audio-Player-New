@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title> Audio Player</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar card">
+      <div class="brand">
+        <div class="brand-mark">♪</div>
+        <div>
+          <h1> Audio Player</h1>
+        </div>
+      </div>
+
+      <label class="upload-box" for="fileInput">
+        <input id="fileInput" type="file" accept="audio/*" multiple webkitdirectory hidden />
+        <span class="upload-title">Thêm file audio</span>
+        <span class="upload-subtitle">Chọn nhiều file MP3, WAV, M4A, OGG...</span>
+      </label>
+      <label class="upload-box" for="folderInput">
+  <input id="folderInput" type="file" webkitdirectory hidden>
+  Tải folder nhạc
+</label>
+
+      <div id="dropZone" class="drop-zone">
+        Kéo & thả file audio vào đây
+      </div>
+
+      <div class="playlist-header">
+        <h2>Danh sách phát</h2>
+        <button id="clearPlaylistBtn" class="ghost-btn" type="button">Xóa danh sách</button>
+      </div>
+
+      <div class="search-wrap">
+        <input id="searchInput" type="search" placeholder="Tìm bài nhạc..." aria-label="Tìm bài nhạc" />
+      </div>
+
+      <ul id="playlist" class="playlist"></ul>
+    </aside>
+
+    <main class="player-area">
+      <section class="hero card">
+        <div class="cover">
+  <img id="coverImage" class="cover-img" />
+  <div class="disc"></div>
+</div>
+
+        <div class="track-meta">
+          <p class="eyebrow">Đang phát</p>
+          <h2 id="trackTitle">Chưa có bài hát</h2>
+          <p id="trackSubtitle">Hãy thêm file audio để bắt đầu</p>
+        </div>
+      </section>
+
+      <section class="visual-card card">
+        <canvas id="visualizer" width="1200" height="260" aria-label="Audio visualizer"></canvas>
+      </section>
+
+      <section class="controls card">
+        <audio id="audio" preload="metadata"></audio>
+
+        <div class="time-wrap">
+          <span id="currentTime">00:00</span>
+          <input id="seekBar" class="range seek" type="range" min="0" max="100" value="0" step="0.1" />
+          <span id="duration">00:00</span>
+        </div>
+
+        <div class="button-row">
+          <button id="prevBtn" class="control-btn" type="button" aria-label="Bài trước">⏮</button>
+          <button id="playBtn" class="play-btn" type="button" aria-label="Phát hoặc tạm dừng">▶</button>
+          <button id="nextBtn" class="control-btn" type="button" aria-label="Bài tiếp theo">⏭</button>
+        </div>
+
+        <div class="secondary-controls">
+          <div class="field">
+            <label for="volumeBar">Âm lượng</label>
+            <input id="volumeBar" class="range" type="range" min="0" max="1" value="1" step="0.01" />
+          </div>
+
+          <div class="field">
+            <label for="speedSelect">Tốc độ</label>
+            <select id="speedSelect">
+              <option value="0.75">0.75x</option>
+              <option value="1" selected>1x</option>
+              <option value="1.25">1.25x</option>
+              <option value="1.5">1.5x</option>
+              <option value="1.75">1.75x</option>
+              <option value="2">2x</option>
+            </select>
+          </div>
+
+          <div class="field inline">
+            <label class="checkbox">
+              <input id="loopToggle" type="checkbox" />
+              <span>Lặp 1 bài</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="hint">
+          Kéo thả để đổi vị trí bài hát trong danh sách. Phím tắt:
+          <strong>Space</strong> phát/tạm dừng,
+          <strong>← / →</strong> tua 5 giây,
+          <strong>↑ / ↓</strong> chỉnh âm lượng.
+        </div>
+      </section>
+    </main>
+  </div>
+<script src="https://cdn.jsdelivr.net/npm/music-metadata-browser/dist/music-metadata-browser.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
