@@ -47,6 +47,7 @@ let searchTerm = ""
 
 let audioContext
 let analyser
+let sourceNode = null
 
 /* =========================
 DATABASE
@@ -472,22 +473,6 @@ VISUALIZER
 
 async function initAudioGraph(){
 
- if(audioContext) return
-
-audioContext = new (window.AudioContext || window.webkitAudioContext)()
- analyser = audioContext.createAnalyser()
-
- const src = audioContext.createMediaElementSource(audio)
-
- src.connect(analyser)
- analyser.connect(audioContext.destination)
-
- analyser.fftSize=256
-
- drawVisualizer()
-
-}
-
 function drawVisualizer(){
 
  const buffer = analyser.frequencyBinCount
@@ -523,6 +508,32 @@ function drawVisualizer(){
 /* =========================
 EVENTS
 ========================= */
+  function disableVisualizer(){
+
+  if(!audioContext) return
+
+  try{
+
+    if(sourceNode) sourceNode.disconnect()
+
+    if(analyser) analyser.disconnect()
+
+  }catch(e){}
+
+}
+  function enableVisualizer(){
+
+  if(!audioContext) return
+
+  try{
+
+    sourceNode.connect(analyser)
+
+    analyser.connect(audioContext.destination)
+
+  }catch(e){}
+
+}
 document.addEventListener("visibilitychange", async () => {
 
   if (!audioContext) return
@@ -624,7 +635,17 @@ audio.onloadedmetadata=()=>{
 
 }
 
-audio.onplay = () => {
+audio.onplay = async () => {
+
+  if(audioContext && audioContext.state === "suspended"){
+    await audioContext.resume()
+  }
+
+  playBtn.textContent = "⏸"
+
+  renderPlaylist()
+
+}
 
   playBtn.textContent = "⏸";
 
@@ -674,3 +695,20 @@ if("serviceWorker" in navigator){
   navigator.serviceWorker.register("service-worker.js")
 
 }
+  document.addEventListener("visibilitychange", async () => {
+
+  if(document.hidden){
+
+    disableVisualizer()
+
+  }else{
+
+    enableVisualizer()
+
+    if(audioContext && audioContext.state === "suspended"){
+      await audioContext.resume()
+    }
+
+  }
+
+})
