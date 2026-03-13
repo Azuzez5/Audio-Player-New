@@ -687,18 +687,35 @@ if("serviceWorker" in navigator){
 }
   document.addEventListener("visibilitychange", async () => {
 
-  if(document.hidden){
+  if (!audioContext || !sourceNode || !analyser) return;
 
-    disableVisualizer()
+  try {
 
-  }else{
+    if (document.hidden) {
 
-    enableVisualizer()
+      // Background → tắt visualizer
+      sourceNode.disconnect();
+      analyser.disconnect();
 
-    if(audioContext && audioContext.state === "suspended"){
-      await audioContext.resume()
+      // đảm bảo audio vẫn phát trực tiếp
+      sourceNode.connect(audioContext.destination);
+
+    } else {
+
+      // Foreground → bật lại visualizer
+      sourceNode.disconnect();
+
+      sourceNode.connect(analyser);
+      analyser.connect(audioContext.destination);
+
+      if (audioContext.state === "suspended") {
+        await audioContext.resume();
+      }
+
     }
 
+  } catch (e) {
+    console.log("Audio graph error:", e);
   }
 
-})
+});
