@@ -704,19 +704,12 @@ document.addEventListener("touchstart", async () => {
 
  if(document.hidden){
 
+  // chỉ tắt visualizer
   visualizerActive = false
-
-  try{
-   sourceNode.disconnect(analyser)
-  }catch(e){}
 
  }else{
 
   visualizerActive = true
-
-  try{
-   sourceNode.connect(analyser)
-  }catch(e){}
 
   if(audioContext.state === "suspended"){
    await audioContext.resume()
