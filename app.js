@@ -1,7 +1,7 @@
 /* =========================
 DOM
 ========================= */
-if ('mediaSession' in navigator) 
+if ('mediaSession' in navigator) { 
   console.log('Media Session supported');
 }
 const coverImage = document.getElementById("coverImage")
@@ -530,7 +530,6 @@ function disableVisualizer(){
 
  try{
   sourceNode.disconnect()
-  \
  }catch(e){}
 
 }
