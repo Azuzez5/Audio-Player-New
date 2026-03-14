@@ -1,7 +1,7 @@
 /* =========================
 DOM
 ========================= */
-if ('mediaSession' in navigator) {
+if ('mediaSession' in navigator) 
   console.log('Media Session supported');
 }
 const coverImage = document.getElementById("coverImage")
@@ -484,11 +484,10 @@ async function initAudioGraph(){
  sourceNode = audioContext.createMediaElementSource(audio)
 
  // audio luôn đi thẳng ra loa
- sourceNode.connect(audioContext.destination)
-
- // visualizer chỉ là nhánh phụ
  sourceNode.connect(analyser)
 
+ // visualizer chỉ là nhánh phụ
+  analyser.connect(audioContext.destination)
  analyser.fftSize = 256
 
  drawVisualizer()
@@ -531,7 +530,7 @@ function disableVisualizer(){
 
  try{
   sourceNode.disconnect()
-  analyser.disconnect()
+  \
  }catch(e){}
 
 }
@@ -542,7 +541,6 @@ function enableVisualizer(){
 
  try{
   sourceNode.connect(analyser)
-  analyser.connect(audioContext.destination)
  }catch(e){}
 
 }
@@ -689,6 +687,18 @@ if("serviceWorker" in navigator){
   navigator.serviceWorker.register("service-worker.js")
 
 }
+document.addEventListener("touchstart", async () => {
+
+  if(audioContext && audioContext.state === "suspended"){
+    try{
+      await audioContext.resume()
+      console.log("AudioContext resumed")
+    }catch(e){
+      console.log(e)
+    }
+  }
+
+}, { once:true })
   document.addEventListener("visibilitychange", async () => {
 
  if(!audioContext) return
