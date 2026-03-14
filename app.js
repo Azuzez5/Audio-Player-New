@@ -726,30 +726,3 @@ document.addEventListener("touchstart", async () => {
  }
 
 })
-document.addEventListener("visibilitychange", async () => {
-
-  if (!audioContext) return;
-
-  if (!document.hidden) {
-
-    try {
-
-      if (audioContext.state === "suspended") {
-        await audioContext.resume();
-      }
-
-      // trick iOS: play lại audio
-      if (audio.paused === false) {
-        const t = audio.currentTime;
-        audio.pause();
-        audio.currentTime = t;
-        await audio.play();
-      }
-
-    } catch (e) {
-      console.log("resume failed", e);
-    }
-
-  }
-
-});
